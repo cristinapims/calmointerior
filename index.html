@@ -589,34 +589,42 @@ function showTransfer(type) {
   sendEmail();
 }
 
+let emailSent = false;
+
 function sendEmail() {
-  // Build email body
+  if (emailSent) return;
+  emailSent = true;
+
   const est = calcEstimate();
-  const subject = encodeURIComponent('Nuevo cliente Calmo: ' + data.name);
-  const body = encodeURIComponent(
-    'NUEVO LEAD - CALMO\n\n' +
-    'Nombre: ' + data.name + '\n' +
-    'Email: ' + data.email + '\n' +
-    'Teléfono: ' + data.phone + '\n' +
-    'Ubicación: ' + data.location + '\n\n' +
-    'PROYECTO:\n' +
-    'Tipo: ' + data.type + '\n' +
-    'Alcance: ' + data.scope + '\n' +
-    'Espacios: ' + data.spaces.join(', ') + '\n' +
-    'm²: ' + data.sqm + '\n' +
-    'Estado: ' + data.condition + '\n' +
-    'Timeline: ' + data.timeline + '\n' +
-    'Presupuesto: ' + data.budget + '\n\n' +
-    'ESTILO:\n' +
-    'Imágenes seleccionadas: ' + data.selectedImages.map(i => '#'+(i+1)).join(', ') + '\n' +
-    'Por qué: ' + data.styleWhy + '\n' +
-    'Referencia: ' + data.styleRef + '\n\n' +
-    'COTIZACIÓN ESTIMADA: ' + est.range
-  );
-  
-  // Create a hidden mailto link (fallback — ideally you'd use an email API)
-  console.log('Client data:', JSON.stringify(data, null, 2));
-  console.log('Estimated:', est.range);
+  const payload = {
+    access_key: 'd0225539-231b-41ba-b705-6968ca825135',
+    subject: 'Nuevo cliente Calmo: ' + data.name,
+    from_name: 'Calmo Intake Form',
+    Nombre: data.name,
+    Email: data.email,
+    Telefono: data.phone,
+    Ubicacion: data.location,
+    Tipo_de_proyecto: data.type,
+    Alcance: data.scope,
+    Espacios: data.spaces.join(', '),
+    Metros_cuadrados: data.sqm,
+    Estado_del_espacio: data.condition,
+    Timeline: data.timeline,
+    Presupuesto_mobiliario: data.budget,
+    Imagenes_de_estilo: data.selectedImages.map(i => '#'+(i+1)).join(', '),
+    Por_que_esas_imagenes: data.styleWhy,
+    Referencia_adicional: data.styleRef || '—',
+    Cotizacion_estimada: est.range
+  };
+
+  fetch('https://api.web3forms.com/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(d => { if(d.success) console.log('Email sent'); else console.error('Email failed', d); })
+  .catch(e => console.error('Email error', e));
 }
 
 function markPaid() {
@@ -652,5 +660,7 @@ function renderSchedule() {
   render();
 })();
 </script>
+</body>
+</html>
 </body>
 </html>
