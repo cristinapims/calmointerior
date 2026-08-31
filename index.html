@@ -174,16 +174,15 @@ const PRICING = {
   consultoriaFija: 15000  // asesoría: no escala por m²
 };
 
-/* Links de pago. Ver instrucciones de redirect en la conversación. */
-const STRIPE_MXN = 'https://buy.stripe.com/8x29AScx462jgB1c9I1sQ01';
-const STRIPE_USD = 'https://buy.stripe.com/8x24gydB8cqHbgH1v41sQ00';
-const PAYPAL     = 'https://www.paypal.com/ncp/payment/9E3X352MBY66Q';
-const CALENDAR   = 'https://cal.com/cristina-pimentel-yk5b0p/kickoff';
+/* Calendario con cobro integrado. El event type de cal.com debe tener
+   la app de Stripe activada y el precio configurado: cal.com no confirma
+   la reserva hasta que el cargo pasa. */
+const CALENDAR = 'https://cal.com/cristina-pimentel-yk5b0p/kickoff';
 
 const T = {
   es: {
     lang_title: "CALMO",
-    lang_tagline: "INTERIORISMO",
+    lang_tagline: "INTERIOR",
     lang_es: "Continuar en Español",
     lang_en: "Continue in English",
     step: "Paso",
@@ -216,17 +215,14 @@ const T = {
     s3_note: "* La cotización final se confirma después de la consulta inicial.",
     s3_disclaimer: "Este estimado cubre nuestros honorarios de diseño. No incluye el costo de mobiliario, materiales ni obra. La shopping list con precios y proveedores es parte de los entregables.",
     s3_pay_title: "Reserva tu consulta inicial",
-    s3_pay_subtitle: "Al completar el pago pasarás directo al calendario para agendar tu llamada.",
+    s3_pay_subtitle: "Elige tu horario y completa el pago en el mismo paso.",
     s3_thanks: "Gracias por tu interés en Calmo.",
 
-    s4_title: "Último paso",
-    s4_subtitle: "En cuanto completes el pago, agenda aquí tu llamada de 60 minutos con Cristina.",
-    s4_btn: "AGENDAR LLAMADA →",
-    s4_thanks: "Gracias por confiar en Calmo. Nos vemos pronto.",
+
   },
   en: {
     lang_title: "CALMO",
-    lang_tagline: "INTERIOR DESIGN",
+    lang_tagline: "INTERIOR",
     lang_es: "Continuar en Español",
     lang_en: "Continue in English",
     step: "Step",
@@ -259,18 +255,15 @@ const T = {
     s3_note: "* Final quote is confirmed after the initial consultation.",
     s3_disclaimer: "This estimate covers our design fees. It does not include the cost of furniture, materials, or construction. A shopping list with pricing and vendors is included in our deliverables.",
     s3_pay_title: "Book your initial consultation",
-    s3_pay_subtitle: "Once your payment goes through you'll be taken straight to the calendar to schedule your call.",
+    s3_pay_subtitle: "Pick your time and complete payment in the same step.",
     s3_thanks: "Thank you for your interest in Calmo.",
 
-    s4_title: "Last step",
-    s4_subtitle: "Once your payment goes through, schedule your 60-minute call with Cristina here.",
-    s4_btn: "SCHEDULE CALL →",
-    s4_thanks: "Thank you for trusting Calmo. See you soon.",
+
   }
 };
 
 let lang = 'es';
-let step = 0; // 0=idioma, 1-2=preguntas, 3=cotización, 4=agenda
+let step = 0; // 0=idioma, 1-2=preguntas, 3=cotización + agendar
 let data = { name:'', location:'', type:'', scope:'', spaces:[], sqm:'' };
 
 const t = (key) => T[lang][key] || key;
@@ -282,7 +275,6 @@ function render() {
   if (step === 0) renderLang();
   else if (step <= 2) renderStep();
   else if (step === 3) renderEstimate();
-  else if (step === 4) renderSchedule();
 }
 
 function renderLang() {
@@ -352,12 +344,9 @@ function renderEstimate() {
   const est = calcEstimate();
   const usd = isUSLocation();
   const consultFee = usd ? '$' + PRICING.consulta.usd + ' USD' : '$' + PRICING.consulta.mxn.toLocaleString() + ' MXN';
-  const stripeLabel = lang==='es'
-    ? 'Pagar con tarjeta — ' + consultFee
-    : 'Pay with card — ' + consultFee;
-  const paypalLabel = lang==='es'
-    ? 'Pagar con PayPal — $' + PRICING.consulta.usd + ' USD'
-    : 'Pay with PayPal — $' + PRICING.consulta.usd + ' USD';
+  const bookLabel = lang==='es'
+    ? 'AGENDAR CONSULTA — ' + consultFee
+    : 'BOOK CONSULTATION — ' + consultFee;
 
   app.innerHTML = `
     <div class="screen active">
@@ -391,8 +380,7 @@ function renderEstimate() {
         <div class="payment-section">
           <div class="question-title serif" style="font-size:20px;margin-bottom:4px">${t('s3_pay_title')}</div>
           <div class="question-subtitle">${t('s3_pay_subtitle')}</div>
-          <a href="${usd ? STRIPE_USD : STRIPE_MXN}" target="_blank" rel="noopener" class="payment-btn payment-cta" onclick="goToSchedule()">${stripeLabel}</a>
-          <a href="${PAYPAL}" target="_blank" rel="noopener" class="payment-btn" onclick="goToSchedule()">${paypalLabel}</a>
+          <a href="${CALENDAR}" class="payment-btn payment-cta" onclick="sendEmail()">${bookLabel}</a>
         </div>
 
         <div class="divider"></div>
@@ -526,42 +514,14 @@ function sendEmail() {
   }).catch(e => console.error('Email error', e));
 }
 
-function markPaid() {
-  localStorage.setItem('calmo_paid', '1');
-}
 
-/* El pago abre en pestaña nueva; esta pestaña avanza al calendario.
-   Así el cliente siempre tiene dónde agendar, pague por donde pague. */
-function goToSchedule() {
-  sendEmail();
-  markPaid();
-  setTimeout(() => { step = 4; render(); window.scrollTo(0, 0); }, 400);
-}
 
-function renderSchedule() {
-  app.innerHTML = `
-    <div class="screen active">
-      <div class="container fade-up" style="text-align:center;padding:60px 24px">
-        <div class="logo serif" style="font-size:28px;margin-bottom:8px">calmo</div>
-        <div style="font-size:48px;margin-bottom:24px">✓</div>
-        <div class="question-title serif" style="margin-bottom:12px">${t('s4_title')}</div>
-        <div class="question-subtitle" style="margin-bottom:32px">${t('s4_subtitle')}</div>
-        <a href="${CALENDAR}" class="payment-btn payment-cta" style="display:inline-block;text-align:center;max-width:360px;width:100%;font-size:15px;padding:18px 24px">${t('s4_btn')}</a>
-        <div class="estimate-note" style="margin-top:32px">${t('s4_thanks')}</div>
-      </div>
-    </div>`;
-}
-
-// Init — si vuelve del pago, va directo a agendar
+// Init
 (function() {
   const params = new URLSearchParams(window.location.search);
   const urlLang = params.get('lang');
   if (urlLang === 'en' || urlLang === 'es') lang = urlLang;
 
-  if (params.get('paid') === '1' || localStorage.getItem('calmo_paid') === '1') {
-    localStorage.removeItem('calmo_paid');
-    step = 4;
-  }
   render();
 })();
 </script>
