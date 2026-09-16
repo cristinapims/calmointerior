@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cotizar — Calmo</title>
+<meta name="description" content="Calmo, estudio mexicano de diseño interior y arquitectura. Guadalajara, México.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend+Exa:wght@400&family=Quicksand:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+/* Herramienta de cotización — estilos propios del cuestionario, alineados a la paleta y tipografía de Calmo */
+#quote-tool{
+  --bg:var(--stone);
+  --text:var(--ink);
+  --text-light:var(--mute);
+  --text-lighter:rgba(35,34,31,.45);
+  --accent:var(--travertine);
+  --accent-light:#bfb093;
+  --border:var(--line);
+  --white:var(--bone);
+  --error:#A85A4A;
+}
+#quote-tool * { box-sizing:border-box; }
+#quote-tool .serif{font-family:var(--display)}
+
+/* Animations */
+@keyframes qFadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+@keyframes qFadeIn { from { opacity:0; } to { opacity:1; } }
+#quote-tool .fade-up { animation: qFadeUp 0.8s cubic-bezier(0.22,1,0.36,1) forwards; }
+#quote-tool .fade-in { animation: qFadeIn 0.6s ease forwards; }
+
+/* Layout */
+#quote-tool .container { max-width:640px; margin:0 auto; padding:24px 0; display:flex; flex-direction:column; }
+
+/* Screen */
+#quote-tool .screen { display:none; }
+#quote-tool .screen.active { display:flex; flex-direction:column; }
+
+/* Intro */
+#quote-tool .intro-screen { justify-content:center; align-items:center; text-align:center; padding:60px 24px; }
+#quote-tool .intro-screen .logo { font-family:var(--display); font-size:42px; font-weight:400; letter-spacing:0.15em; color:var(--text); margin-bottom:8px; }
+#quote-tool .intro-screen .tagline { font-size:13px; color:var(--text-lighter); letter-spacing:0.1em; margin-bottom:48px; }
+#quote-tool .lang-btn { display:block; width:100%; max-width:320px; margin:0 auto 12px; padding:16px; background:var(--white); border:1px solid var(--border); font-family:var(--body); font-size:14px; color:var(--text); cursor:pointer; letter-spacing:0.05em; transition:all 0.3s; }
+#quote-tool .lang-btn:hover { border-color:var(--accent); background:var(--white); }
+
+/* Progress */
+#quote-tool .progress-bar { width:100%; height:2px; background:var(--border); margin:16px 0 32px; }
+#quote-tool .progress-fill { height:100%; background:var(--accent); transition:width 0.6s cubic-bezier(0.22,1,0.36,1); }
+
+/* Step header */
+#quote-tool .step-label { font-size:11px; color:var(--text-lighter); letter-spacing:0.15em; margin-bottom:4px; }
+#quote-tool .step-count { font-size:11px; color:var(--text-lighter); margin-bottom:0; }
+
+/* Questions */
+#quote-tool .question-title { font-family:var(--display); font-size:24px; font-weight:400; line-height:1.4; margin:24px 0 20px; color:var(--text); }
+#quote-tool .question-subtitle { font-size:13px; color:var(--text-light); line-height:1.6; margin-bottom:24px; }
+
+/* Inputs */
+#quote-tool input[type="text"], #quote-tool input[type="email"], #quote-tool input[type="tel"], #quote-tool input[type="number"], #quote-tool textarea, #quote-tool select {
+  width:100%; padding:14px 16px; background:var(--white); border:1px solid var(--border);
+  font-family:var(--body); font-size:14px; color:var(--text); outline:none;
+  transition:border-color 0.3s; margin-bottom:12px; -webkit-appearance:none; border-radius:0;
+}
+#quote-tool input:focus, #quote-tool textarea:focus, #quote-tool select:focus { border-color:var(--accent); }
+#quote-tool textarea { min-height:100px; resize:vertical; line-height:1.6; }
+#quote-tool select { cursor:pointer; }
+
+/* Radio/Check options */
+#quote-tool .option-group { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+#quote-tool .option-btn { padding:14px 16px; background:var(--white); border:1px solid var(--border); font-family:var(--body); font-size:14px; color:var(--text); cursor:pointer; text-align:left; transition:all 0.25s; line-height:1.4; }
+#quote-tool .option-btn:hover { border-color:var(--accent-light); }
+#quote-tool .option-btn.selected { border-color:var(--accent); background:rgba(168,151,127,0.12); }
+
+/* Image grid */
+#quote-tool .image-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
+#quote-tool .img-card { position:relative; cursor:pointer; overflow:hidden; aspect-ratio:1; border:2px solid transparent; transition:all 0.3s; }
+#quote-tool .img-card img { width:100%; height:100%; object-fit:cover; transition:transform 0.4s; }
+#quote-tool .img-card:hover img { transform:scale(1.05); }
+#quote-tool .img-card.selected { border-color:var(--accent); }
+#quote-tool .img-card.selected::after { content:'✓'; position:absolute; top:8px; right:8px; width:24px; height:24px; background:var(--accent); color:var(--white); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; }
+#quote-tool .img-card.disabled { opacity:0.4; pointer-events:none; }
+#quote-tool .img-hint { font-size:12px; color:var(--text-lighter); margin-bottom:16px; }
+
+/* Navigation */
+#quote-tool .nav-row { display:flex; gap:12px; margin-top:32px; padding:24px 0; }
+#quote-tool .btn { flex:1; padding:14px; font-family:var(--body); font-size:13px; letter-spacing:0.08em; cursor:pointer; transition:all 0.3s; border:none; }
+#quote-tool .btn-back { background:none; border:1px solid var(--border); color:var(--text-light); }
+#quote-tool .btn-back:hover { border-color:var(--text-light); }
+#quote-tool .btn-next { background:var(--accent); color:var(--white); }
+#quote-tool .btn-next:hover { background:var(--accent-light); }
+#quote-tool .btn-next:disabled { background:var(--border); color:var(--text-lighter); cursor:default; }
+
+/* Estimate screen */
+#quote-tool .estimate-card { background:var(--white); border:1px solid var(--border); padding:32px 24px; margin:24px 0; }
+#quote-tool .estimate-label { font-size:11px; letter-spacing:0.15em; color:var(--text-lighter); margin-bottom:8px; }
+#quote-tool .estimate-range { font-family:var(--display); font-size:36px; font-weight:400; color:var(--text); margin-bottom:4px; }
+#quote-tool .estimate-note { font-size:12px; color:var(--text-light); line-height:1.6; }
+#quote-tool .estimate-breakdown { margin-top:20px; padding-top:20px; border-top:1px solid var(--border); }
+#quote-tool .estimate-line { display:flex; justify-content:space-between; padding:8px 0; font-size:13px; color:var(--text-light); }
+#quote-tool .estimate-line span:last-child { color:var(--text); font-weight:500; }
+
+/* Payment */
+#quote-tool .payment-section { margin-top:24px; }
+#quote-tool .payment-btn { display:block; width:100%; padding:16px; margin-bottom:10px; background:var(--white); border:1px solid var(--border); font-family:var(--body); font-size:14px; color:var(--text); cursor:pointer; text-align:center; transition:all 0.3s; text-decoration:none; }
+#quote-tool .payment-btn:hover { border-color:var(--accent); }
+#quote-tool .payment-cta { background:var(--accent); color:var(--white); border:none; font-size:14px; letter-spacing:0.05em; margin-bottom:20px; }
+#quote-tool .payment-cta:hover { background:var(--accent-light); }
+
+/* Summary */
+#quote-tool .summary-section { margin-bottom:24px; }
+#quote-tool .summary-label { font-size:11px; letter-spacing:0.12em; color:var(--text-lighter); margin-bottom:6px; }
+#quote-tool .summary-value { font-size:14px; color:var(--text); line-height:1.6; }
+#quote-tool .selected-images { display:flex; gap:8px; margin-top:8px; }
+#quote-tool .selected-images img { width:80px; height:80px; object-fit:cover; }
+
+#quote-tool .divider { width:100%; height:1px; background:var(--border); margin:24px 0; }
+
+@media (max-width:400px) {
+  #quote-tool .image-grid { grid-template-columns:repeat(3,1fr); gap:6px; }
+  #quote-tool .question-title { font-size:21px; }
+  #quote-tool .estimate-range { font-size:28px; }
+}
+</style>
+</head>
+<body class="inner">
+<nav class="nav" id="nav">
+  <a href="index.html" class="mark" aria-label="Calmo, inicio"><img src="images/logo.png" alt="" onerror="this.remove()"><span>C</span></a>
+  <ul id="menu">
+    <li><a href="servicios.html" data-es="SERVICIOS" data-en="SERVICES">SERVICIOS</a></li>
+    <li><a href="proyectos.html" data-es="PROYECTOS" data-en="PROJECTS">PROYECTOS</a></li>
+    <li><a href="estudio.html" data-es="ESTUDIO" data-en="STUDIO">ESTUDIO</a></li>
+    <li><a href="guias.html" data-es="GUÍAS" data-en="GUIDES">GUÍAS</a></li>
+    <li><a href="cotizar.html" data-es="COTIZAR" data-en="QUOTE">COTIZAR</a></li>
+    <li><a href="contacto.html" data-es="CONTACTO" data-en="CONTACT">CONTACTO</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="lang" id="lang" aria-label="Cambiar idioma / Change language"><span class="on" data-l="es">ES</span> / <span data-l="en">EN</span></button>
+    <a class="bag" href="guias.html" aria-label="Tienda / Shop"><svg viewBox="0 0 32 36" width="30" height="34" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 11h26l-2 23H5z"/><path d="M11 14V8a5 5 0 0 1 10 0v6"/></svg></a>
+    <button class="burger" id="burger" aria-expanded="false" aria-controls="menu" data-es="MENÚ" data-en="MENU">MENÚ</button>
+  </div>
+</nav>
+<main>
+<section id="quote-tool">
+  <div id="app"></div>
+</section>
+</main>
+<footer>
+  <span>© <span id="yr"></span> Calmo Interior</span>
+  <span>Guadalajara, México</span>
+</footer>
+<script src="main.js"></script>
+<script>
+/* Cuestionario de cotización — lógica original, sin cambios de comportamiento.
+   Solo se renombraron `lang`→`qlang` y `setLang`→`setQuoteLang` para no chocar con main.js. */
+
+/* ============================================================
+   CONFIGURACIÓN DE PRECIOS — edita solo estos números
+   ============================================================ */
+/* ============================================================
+   MODELO DE COBRO CALMO
+   ------------------------------------------------------------
+   Lógica: honorarios de diseño = precio por m² en tramos
+   decrecientes (entre más grande el proyecto, menor la tarifa
+   unitaria — práctica estándar del gremio), ajustado por tipo
+   de espacio y por alcance. Nunca por debajo del mínimo.
+
+   Referencia de mercado MX 2026:
+   · Despachos generales: $300–800 MXN/m²
+   · Despachos con portafolio consolidado: $700–2,000 MXN/m²
+   · GDL / CDMX / MTY: 20–40% arriba de otras plazas
+   · Comercial cotiza por encima de residencial
+   Calmo se ubica en la banda media-alta: autoral, no masivo.
+   ============================================================ */
+const PRICING = {
+  consulta: { mxn: 1200, usd: 70 },
+  fx: 18,                          // tipo de cambio MXN → USD
+
+  minimoProyecto: 15000,           // ningún proyecto baja de aquí
+  amplitudRango: 1.45,             // el máx del rango = mín × esto
+
+  // Precio por m² en tramos decrecientes (residencial, solo diseño)
+  tramos: [
+    { hasta: 60,       min: 700, max: 1000 },   // primeros 60 m²
+    { hasta: 150,      min: 500, max: 720  },   // 61–150 m²
+    { hasta: Infinity, min: 350, max: 500  }    // 151 m² en adelante
+  ],
+
+  tipoMulti: {
+    residencial: 1.0,
+    comercial:   1.4      // más normativa, más partidas, más coordinación
+  },
+
+  alcanceMulti: {
+    disenoSolo:   1.0,    // moodboard, renders, shopping list
+    conCompras:   1.2,    // + procuraduría y gestión de proveedores
+    conEjecucion: 1.5     // + planos ejecutivos y dirección de obra
+  },
+
+  consultoriaFija: 15000  // asesoría: no escala por m²
+};
+
+/* Calendario con cobro integrado. El event type de cal.com debe tener
+   la app de Stripe activada y el precio configurado: cal.com no confirma
+   la reserva hasta que el cargo pasa. */
+const CALENDAR = 'https://cal.com/cristina-pimentel-yk5b0p/kickoff';
+
+const T = {
+  es: {
+    lang_title: "CALMO",
+    lang_tagline: "INTERIOR",
+    lang_es: "Continuar en Español",
+    lang_en: "Continue in English",
+    step: "Paso",
+    of: "de",
+    back: "← ATRÁS",
+    next: "SIGUIENTE →",
+    see_estimate: "VER MI COTIZACIÓN →",
+
+    s1_label: "SOBRE TI",
+    s1_title: "Cuéntanos sobre ti",
+    s1_name: "Nombre completo",
+    s1_location: "¿En qué ciudad está tu proyecto?",
+
+    s2_label: "TU PROYECTO",
+    s2_title: "Háblanos de tu espacio",
+    s2_type: "¿Qué tipo de proyecto es?",
+    s2_type_opts: ["Residencial — Casa", "Residencial — Departamento", "Comercial — Restaurante / Café", "Comercial — Tienda / Retail", "Comercial — Consultorio / Oficina", "Otro"],
+    s2_scope: "¿Qué necesitas?",
+    s2_scope_opts: ["Solo diseño (moodboard, renders, shopping list)", "Diseño + compra de mobiliario", "Diseño + ejecución completa (solo Guadalajara)", "Solo consultoría — guíame y yo lo ejecuto"],
+    s2_spaces: "¿Qué espacios quieres intervenir?",
+    s2_spaces_opts: ["Sala / Estar", "Comedor", "Cocina", "Recámara principal", "Recámaras secundarias", "Baños", "Terraza / Exterior", "Oficina / Estudio", "Todo el inmueble", "Otro"],
+    s2_sqm: "Metros cuadrados totales del proyecto",
+    s2_sqm_ph: "Ej: 180",
+
+    s3_label: "COTIZACIÓN ESTIMADA",
+    s3_title: "Tu proyecto con Calmo",
+    s3_design: "Honorarios de diseño",
+    s3_consultation: "Consulta inicial",
+    s3_consultation_desc: "Videollamada de 60 minutos. Revisamos tu espacio y platicamos algunas ideas iniciales de dirección de diseño.",
+    s3_note: "* La cotización final se confirma después de la consulta inicial.",
+    s3_disclaimer: "Este estimado cubre nuestros honorarios de diseño. No incluye el costo de mobiliario, materiales ni obra. La shopping list con precios y proveedores es parte de los entregables.",
+    s3_pay_title: "Reserva tu consulta inicial",
+    s3_pay_subtitle: "Elige tu horario y completa el pago en el mismo paso.",
+    s3_thanks: "Gracias por tu interés en Calmo.",
+
+  },
+  en: {
+    lang_title: "CALMO",
+    lang_tagline: "INTERIOR",
+    lang_es: "Continuar en Español",
+    lang_en: "Continue in English",
+    step: "Step",
+    of: "of",
+    back: "← BACK",
+    next: "NEXT →",
+    see_estimate: "SEE MY ESTIMATE →",
+
+    s1_label: "ABOUT YOU",
+    s1_title: "Tell us about yourself",
+    s1_name: "Full name",
+    s1_location: "Where is your project located?",
+
+    s2_label: "YOUR PROJECT",
+    s2_title: "Tell us about your space",
+    s2_type: "What type of project is it?",
+    s2_type_opts: ["Residential — House", "Residential — Apartment", "Commercial — Restaurant / Café", "Commercial — Store / Retail", "Commercial — Office / Clinic", "Other"],
+    s2_scope: "What do you need?",
+    s2_scope_opts: ["Design only (moodboard, renders, shopping list)", "Design + furniture procurement", "Design + full execution (Guadalajara only)", "Consultation only — guide me and I'll execute"],
+    s2_spaces: "Which spaces do you want to design?",
+    s2_spaces_opts: ["Living Room", "Dining Room", "Kitchen", "Primary Bedroom", "Secondary Bedrooms", "Bathrooms", "Terrace / Outdoor", "Office / Study", "Entire property", "Other"],
+    s2_sqm: "Total square meters of the project",
+    s2_sqm_ph: "E.g.: 180",
+
+    s3_label: "ESTIMATED QUOTE",
+    s3_title: "Your project with Calmo",
+    s3_design: "Design fees",
+    s3_consultation: "Initial consultation",
+    s3_consultation_desc: "60-minute video call. We review your space and talk through some initial design direction ideas.",
+    s3_note: "* Final quote is confirmed after the initial consultation.",
+    s3_disclaimer: "This estimate covers our design fees. It does not include the cost of furniture, materials, or construction. A shopping list with pricing and vendors is included in our deliverables.",
+    s3_pay_title: "Book your initial consultation",
+    s3_pay_subtitle: "Pick your time and complete payment in the same step.",
+    s3_thanks: "Thank you for your interest in Calmo.",
+
+  }
+};
+
+let qlang = 'es';
+let step = 0; // 0=idioma, 1-2=preguntas, 3=cotización + agendar
+let data = { name:'', location:'', type:'', scope:'', spaces:[], sqm:'' };
+
+const t = (key) => T[qlang][key] || key;
+const app = document.getElementById('app');
+
+function esc(s) { return String(s).replace(/'/g, "\\'"); }
+
+function render() {
+  if (step === 0) renderLang();
+  else if (step <= 2) renderStep();
+  else if (step === 3) renderEstimate();
+}
+
+function renderLang() {
+  app.innerHTML = `
+    <div class="screen active intro-screen fade-up">
+      <div class="logo serif">${t('lang_title')}</div>
+      <div class="tagline">${t('lang_tagline')}</div>
+      <button class="lang-btn" onclick="setQuoteLang('es')">${t('lang_es')}</button>
+      <button class="lang-btn" onclick="setQuoteLang('en')">${t('lang_en')}</button>
+    </div>`;
+}
+
+function setQuoteLang(l) { qlang = l; step = 1; render(); }
+
+function renderStep() {
+  const progress = ((step - 1) / 2) * 100;
+  const content = step === 1 ? renderStep1() : renderStep2();
+  const isLast = step === 2;
+  const canNext = validateStep();
+
+  app.innerHTML = `
+    <div class="screen active">
+      <div class="container fade-up">
+        <div class="step-label">${t('step')} ${step} ${t('of')} 2 — ${t('s'+step+'_label')}</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+        <div class="question-title serif">${t('s'+step+'_title')}</div>
+        ${content}
+        <div class="nav-row">
+          <button class="btn btn-back" onclick="goBack()">${t('back')}</button>
+          <button class="btn btn-next" ${canNext?'':'disabled'} onclick="goNext()">${isLast ? t('see_estimate') : t('next')}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderStep1() {
+  return `
+    <input type="text" placeholder="${t('s1_name')}" value="${data.name}" oninput="data.name=this.value;updateNav()">
+    <input type="text" placeholder="${t('s1_location')}" value="${data.location}" oninput="data.location=this.value;updateNav()">`;
+}
+
+function renderStep2() {
+  const typeOpts = t('s2_type_opts').map(o =>
+    `<div class="option-btn ${data.type===o?'selected':''}" onclick="data.type='${esc(o)}';render()">${o}</div>`
+  ).join('');
+
+  const scopeOpts = t('s2_scope_opts').map(o =>
+    `<div class="option-btn ${data.scope===o?'selected':''}" onclick="data.scope='${esc(o)}';render()">${o}</div>`
+  ).join('');
+
+  const spaceOpts = t('s2_spaces_opts').map(o =>
+    `<div class="option-btn ${data.spaces.includes(o)?'selected':''}" onclick="toggleSpace('${esc(o)}')">${o}</div>`
+  ).join('');
+
+  return `
+    <div class="question-subtitle">${t('s2_type')}</div>
+    <div class="option-group">${typeOpts}</div>
+    <div class="question-subtitle" style="margin-top:20px">${t('s2_scope')}</div>
+    <div class="option-group">${scopeOpts}</div>
+    <div class="question-subtitle" style="margin-top:20px">${t('s2_spaces')}</div>
+    <div class="option-group">${spaceOpts}</div>
+    <div class="question-subtitle" style="margin-top:20px">${t('s2_sqm')}</div>
+    <input type="number" inputmode="numeric" placeholder="${t('s2_sqm_ph')}" value="${data.sqm}" oninput="data.sqm=this.value;updateNav()">`;
+}
+
+function renderEstimate() {
+  const est = calcEstimate();
+  const usd = isUSLocation();
+  const consultFee = usd ? '$' + PRICING.consulta.usd + ' USD' : '$' + PRICING.consulta.mxn.toLocaleString() + ' MXN';
+  const bookLabel = qlang==='es'
+    ? 'AGENDAR CONSULTA — ' + consultFee
+    : 'BOOK CONSULTATION — ' + consultFee;
+
+  app.innerHTML = `
+    <div class="screen active">
+      <div class="container fade-up">
+        <div class="step-label">${t('s3_label')}</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="question-title serif">${t('s3_title')}</div>
+
+        <div class="estimate-card">
+          <div class="estimate-label">${t('s3_design')}</div>
+          <div class="estimate-range serif">${est.range}</div>
+          <div class="estimate-note">${t('s3_note')}</div>
+          <div class="estimate-note" style="margin-top:8px;font-style:italic">${t('s3_disclaimer')}</div>
+
+          <div class="estimate-breakdown">
+            <div class="estimate-line"><span>${qlang==='es'?'Tipo':'Type'}</span><span>${data.type}</span></div>
+            <div class="estimate-line"><span>${qlang==='es'?'Alcance':'Scope'}</span><span>${data.scope}</span></div>
+            <div class="estimate-line"><span>${qlang==='es'?'Espacios':'Spaces'}</span><span>${data.spaces.join(', ')}</span></div>
+            <div class="estimate-line"><span>m²</span><span>${data.sqm}</span></div>
+          </div>
+        </div>
+
+        <div class="estimate-card">
+          <div class="estimate-label">${t('s3_consultation')}</div>
+          <div class="estimate-range serif">${consultFee}</div>
+          <div class="estimate-note">${t('s3_consultation_desc')}</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="payment-section">
+          <div class="question-title serif" style="font-size:20px;margin-bottom:4px">${t('s3_pay_title')}</div>
+          <div class="question-subtitle">${t('s3_pay_subtitle')}</div>
+          <a href="${CALENDAR}" class="payment-btn payment-cta" onclick="sendEmail()">${bookLabel}</a>
+        </div>
+
+        <div class="divider"></div>
+        <div class="estimate-note" style="text-align:center;padding:16px 0 32px">${t('s3_thanks')}</div>
+
+        <div class="nav-row">
+          <button class="btn btn-back" onclick="step=2;render()">${t('back')}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function calcEstimate() {
+  const P = PRICING;
+  const sqm = parseInt(data.sqm) || 0;
+  const s = data.scope;
+
+  const isCom     = data.type.includes('Comercial') || data.type.includes('Commercial');
+  const isConsult = s.includes('consultoría') || s.includes('Consultation');
+  const hasExec   = s.includes('ejecución') || s.includes('execution');
+  const hasBuying = s.includes('compra') || s.includes('procurement');
+
+  let min, max;
+
+  if (isConsult) {
+    // Asesoría: tarifa fija, no escala por m²
+    min = P.consultoriaFija;
+    max = P.consultoriaFija;
+  } else {
+    // 1. Precio por m² en tramos decrecientes
+    let restante = sqm, previo = 0;
+    min = 0; max = 0;
+    for (const tramo of P.tramos) {
+      if (restante <= 0) break;
+      const ancho = Math.min(restante, tramo.hasta - previo);
+      min += ancho * tramo.min;
+      max += ancho * tramo.max;
+      restante -= ancho;
+      previo = tramo.hasta;
+    }
+
+    // 2. Ajuste por tipo de espacio
+    const mTipo = isCom ? P.tipoMulti.comercial : P.tipoMulti.residencial;
+    min *= mTipo; max *= mTipo;
+
+    // 3. Ajuste por alcance
+    const mAlcance = hasExec ? P.alcanceMulti.conEjecucion
+                   : hasBuying ? P.alcanceMulti.conCompras
+                   : P.alcanceMulti.disenoSolo;
+    min *= mAlcance; max *= mAlcance;
+
+    // 4. Mínimo del estudio (conserva la amplitud del rango)
+    if (min < P.minimoProyecto) {
+      min = P.minimoProyecto;
+      max = Math.max(max, min * P.amplitudRango);
+    }
+  }
+
+  // Redondeo a la mil más cercana
+  min = Math.round(min / 1000) * 1000;
+  max = Math.round(max / 1000) * 1000;
+
+  if (isUSLocation()) {
+    const minUSD = Math.round(min / P.fx / 50) * 50;
+    const maxUSD = Math.round(max / P.fx / 50) * 50;
+    return { range: '$' + minUSD.toLocaleString() + ' — $' + maxUSD.toLocaleString() + ' USD' };
+  }
+  return { range: '$' + min.toLocaleString() + ' — $' + max.toLocaleString() + ' MXN' };
+}
+
+function isUSLocation() {
+  if (qlang === 'en') return true;
+  const loc = data.location.toLowerCase();
+  return ['us','united','florida','california','texas','new york','miami','cabo'].some(k => loc.includes(k));
+}
+
+function validateStep() {
+  if (step === 1) return data.name && data.location;
+  if (step === 2) return data.type && data.scope && data.spaces.length > 0 && data.sqm;
+  return true;
+}
+
+function updateNav() {
+  const btn = document.querySelector('.btn-next');
+  if (btn) btn.disabled = !validateStep();
+}
+
+function goBack() {
+  if (step > 1) { step--; render(); }
+  else { step = 0; render(); }
+}
+
+function goNext() {
+  if (!validateStep()) return;
+  step++;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function toggleSpace(s) {
+  const idx = data.spaces.indexOf(s);
+  if (idx >= 0) data.spaces.splice(idx, 1);
+  else data.spaces.push(s);
+  render();
+}
+
+let emailSent = false;
+
+function sendEmail() {
+  if (emailSent) return;
+  emailSent = true;
+
+  const est = calcEstimate();
+  const payload = {
+    access_key: 'd0225539-231b-41ba-b705-6968ca825135',
+    subject: 'Nuevo cliente Calmo: ' + data.name,
+    from_name: 'Calmo Intake Form',
+    Nombre: data.name,
+    Ciudad: data.location,
+    Tipo_de_proyecto: data.type,
+    Alcance: data.scope,
+    Espacios: data.spaces.join(', '),
+    Metros_cuadrados: data.sqm,
+    Cotizacion_estimada: est.range
+  };
+
+  fetch('https://api.web3forms.com/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).catch(e => console.error('Email error', e));
+}
+
+// Init
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const urlLang = params.get('lang');
+  if (urlLang === 'en' || urlLang === 'es') qlang = urlLang;
+
+  render();
+})();
+</script>
+</body>
+</html>
