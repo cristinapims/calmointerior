@@ -1,4 +1,4 @@
-@font-face{font-family:"Stavok Grotesque";src:url("fonts/StavokGrotesque-Regular.woff2") format("woff2"),url("fonts/StavokGrotesque-Regular.otf") format("opentype");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Stavok Grotesque";src:url("fonts/StavokGrotesque-Light.otf") format("opentype");font-weight:400;font-style:normal;font-display:swap}
 :root{
   --stone:#E3DED7;      /* fondo principal */
   --bone:#EEEBE6;       /* superficies claras */
@@ -78,13 +78,18 @@ h2{font-family:var(--display);font-weight:200;font-size:clamp(24px,3vw,38px);let
 
 /* DETALLE DE PROYECTO */
 .dlg-top{display:grid;grid-template-columns:1.6fr 1fr;gap:clamp(14px,2vw,28px)}
-.dlg-top .main{aspect-ratio:4/3}
+.dlg-top{align-items:start}
+.dlg-top .main{aspect-ratio:8/9}
 .dlg-top .side{display:grid;gap:clamp(14px,2vw,28px)}
-.dlg-top .side .ph{aspect-ratio:16/10}
-.dlg-text{display:grid;grid-template-columns:1fr 2fr;gap:40px;margin-top:64px}
-.dlg-text h1{font-family:var(--display);font-weight:300;font-size:clamp(28px,4vw,52px);letter-spacing:.18em;line-height:1.1}
-.dlg-text .loc{font-size:13px;letter-spacing:.16em;color:var(--mute);margin-top:12px}
-.dlg-text .body p{max-width:62ch;margin-bottom:1em}
+.dlg-top .side .ph{aspect-ratio:5/3}
+.dlg-wide{aspect-ratio:16/9;margin-top:clamp(14px,2vw,28px)}
+.dlg-text{max-width:78ch;margin-top:64px}
+.dlg-text h1{font-family:var(--display);font-weight:400;font-size:15px;letter-spacing:.16em}
+.dlg-text .loc{font-size:12px;letter-spacing:.16em;color:var(--mute);margin-top:6px}
+.dlg-text .body{margin-top:28px}
+.dlg-text .body p{margin-bottom:1.3em}
+.dlg-extra{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(14px,2vw,28px);margin-top:clamp(14px,2vw,28px)}
+.dlg-extra .ph{aspect-ratio:4/3}
 .scope{margin-top:26px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
 .goals{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,2vw,28px);margin-top:72px}
 .goals .ph{aspect-ratio:1/1}
@@ -133,7 +138,7 @@ footer{padding:28px var(--pad);display:flex;justify-content:space-between;font-s
   .burger{display:block}
   .svc-grid,.goals{grid-template-columns:1fr}
   .proj-grid{grid-template-columns:1fr}
-  .dlg-top,.dlg-text,.studio,.guides,.contact{grid-template-columns:1fr}
+  .dlg-top,.studio,.guides,.contact,.dlg-extra{grid-template-columns:1fr}
   .steps{grid-template-columns:1fr 1fr;gap:10px}
 }
 @media (max-width:520px){.steps{grid-template-columns:1fr}}

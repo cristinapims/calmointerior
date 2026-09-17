@@ -51,9 +51,15 @@ function fill(){
   proj.querySelector('#dlg-title').textContent=p.t;
   proj.querySelector('#d-loc').textContent=p.loc[l];
   proj.querySelector('#d-body').innerHTML=p.body[l].map(x=>`<p>${x}</p>`).join('')+(p.scope?`<div class="scope">${p.scope[l]}</div>`:'');
-  [1,2,3].forEach(n=>{const box=proj.querySelector('#d-img'+n),img=box.querySelector('img'),src=`images/${k}-${n}.jpg`;
+  [1,2,3,4].forEach(n=>{const box=proj.querySelector('#d-img'+n),img=box.querySelector('img'),src=`images/${k}-${n}.jpg`;
     if(img.dataset.src!==src){img.dataset.src=src;box.dataset.file=src;box.removeAttribute('data-missing');img.style.visibility='';
       img.onerror=()=>{img.style.visibility='hidden';box.setAttribute('data-missing','')};img.src=src}});
+  const total=p.imgs||4;
+  const ex=proj.querySelector('#d-extra');
+  ex.innerHTML='';
+  for(let n=5;n<=total;n++){const src=`images/${k}-${n}.jpg`;
+    ex.innerHTML+=`<div class="ph" data-file="${src}"><img src="${src}" alt="" onerror="this.style.visibility='hidden';this.parentNode.setAttribute('data-missing','')"></div>`;}
+  ex.style.display=total>4?'':'none';
   const g=proj.querySelector('#d-goals');
   g.innerHTML=(p.goals||[]).map((x,i)=>`<div><div class="ph" data-file="images/${k}-goal-${i+1}.jpg"><img src="images/${k}-goal-${i+1}.jpg" alt="" onerror="this.style.visibility='hidden';this.parentNode.setAttribute('data-missing','')"></div><h5>${x.t[l]}</h5><p>${x.d[l]}</p></div>`).join('');
   g.style.display=p.goals?'':'none';
