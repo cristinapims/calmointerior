@@ -91,10 +91,10 @@ h2{font-family:var(--display);font-weight:200;font-size:clamp(24px,3vw,38px);let
 .dlg-extra{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(14px,2vw,28px);margin-top:clamp(14px,2vw,28px)}
 .dlg-extra .ph{aspect-ratio:4/3}
 .scope{margin-top:26px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
-.goals{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,2vw,28px);margin-top:72px}
-.goals .ph{aspect-ratio:1/1}
-.goals h5{font-family:var(--display);font-weight:300;font-size:13px;letter-spacing:.16em;margin:18px 0 6px}
-.goals p{font-size:13px;color:var(--mute)}
+
+/* Imágenes de proyecto ya diseñadas (goals, mobiliario): se muestran completas, tal cual */
+.section-img{margin-top:64px}
+.section-img img{width:100%;display:block}
 
 /* PROCESO */
 .process{background:var(--bone)}
@@ -136,7 +136,7 @@ footer{padding:28px var(--pad);display:flex;justify-content:space-between;font-s
   .nav ul li{border-bottom:1px solid var(--line)}
   .nav ul a{display:block;padding:14px 0}
   .burger{display:block}
-  .svc-grid,.goals{grid-template-columns:1fr}
+  .svc-grid{grid-template-columns:1fr}
   .proj-grid{grid-template-columns:1fr}
   .dlg-top,.studio,.guides,.contact,.dlg-extra{grid-template-columns:1fr}
   .steps{grid-template-columns:1fr 1fr;gap:10px}
@@ -171,7 +171,8 @@ footer{padding:28px var(--pad);display:flex;justify-content:space-between;font-s
 .home .hero .ph::before{background:rgba(22,20,18,.38)}
 .home .wordmark{font-family:var(--display);font-weight:600;font-size:clamp(40px,4.6vw,66px);letter-spacing:.12em;margin-right:-.12em;animation:fade 1.4s ease both}
 .home .hero p{font-family:var(--body);font-weight:400;font-size:clamp(14px,1.45vw,21px);letter-spacing:.02em;margin-top:clamp(18px,2.4vw,34px);animation:fade 1.4s .25s ease both}
-.home .hero-btn{margin-top:clamp(120px,19vh,190px);padding:10px 48px;border:0;background:rgba(255,255,255,.2);font-family:var(--body);font-weight:400;font-size:clamp(15px,1.45vw,21px);letter-spacing:.02em;animation:fade 1.4s .5s ease both;transition:background .3s}
+.home .hero-btns{margin-top:clamp(120px,19vh,190px);display:flex;flex-wrap:wrap;justify-content:center;gap:14px}
+.home .hero-btn{margin-top:0;padding:10px 48px;border:0;background:rgba(255,255,255,.2);font-family:var(--body);font-weight:400;font-size:clamp(15px,1.45vw,21px);letter-spacing:.02em;animation:fade 1.4s .5s ease both;transition:background .3s}
 .home .hero-btn:hover{background:rgba(255,255,255,.34);color:var(--bone)}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @media (max-width:900px){.nav ul{margin:0}.mark{font-size:44px}.mark img{height:48px}}
@@ -181,7 +182,7 @@ footer{padding:28px var(--pad);display:flex;justify-content:space-between;font-s
 body{text-transform:uppercase;font-weight:400;font-size:14px;letter-spacing:.04em;line-height:1.9}
 h1,h2,h3,h4,h5,.wordmark,.mark span,.proj .cap b,.dlg-text h1,.step .n,.contact .big,.manifesto .m1,.tier h4{font-family:var(--display)!important;font-weight:400!important}
 .home .wordmark{font-weight:400!important}
-.step h4,.goals h5,.svc h3{font-family:var(--display)!important}
+.step h4,.svc h3{font-family:var(--display)!important}
 .mark span{font-style:normal;font-size:46px}
 input,textarea{text-transform:none}
 .contact li a[href^="mailto"]{text-transform:none}
