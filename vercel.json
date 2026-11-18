@@ -1,1 +1,12 @@
-{ "cleanUrls": true }
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/estudio", "destination": "/nosotros", "permanent": true },
+    { "source": "/proyecto", "destination": "/proyectos", "permanent": true },
+    { "source": "/agavos", "destination": "/hacienda-agavos", "permanent": true }
+  ],
+  "headers": [
+    { "source": "/assets/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=2592000" }] }
+  ]
+}

@@ -1,8 +1,5 @@
 .DS_Store
-
-# Carpetas de fotos originales (sin procesar) que subes para referencia;
-# las versiones optimizadas ya están en images/*.jpg
-images/BCN00/
-images/KOPKO/
-images/HACIENDA AGAVOS/
-images/CASACABO/
+# Fotos y archivos originales de cada proyecto (SKP, DWG, renders sin procesar).
+# Las versiones optimizadas que usa el sitio están en assets/img/
+images/
+.claude/

@@ -1,4 +1,3 @@
 User-agent: *
 Allow: /
-
-Sitemap: https://calmointerior.vercel.app/sitemap.xml
+Sitemap: https://www.calmointerior.com/sitemap.xml
